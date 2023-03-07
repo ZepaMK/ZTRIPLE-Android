@@ -75,7 +75,6 @@ dependencies {
     //Android dependencies
     implementation 'androidx.appcompat:appcompat:1.5.0'
     implementation "com.google.android.material:material:1.6.1"
-
     implementation 'androidx.core:core-ktx:1.7.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.3.1'
     testImplementation 'junit:junit:4.13.2'
@@ -100,8 +99,13 @@ dependencies {
     implementation "androidx.compose.runtime:runtime-livedata:$compose_ui_version"
     implementation "androidx.compose.ui:ui-test-junit4:$compose_ui_version"
     implementation "androidx.hilt:hilt-navigation-compose:1.0.0"
-    implementation "io.coil-kt:coil-compose:2.1.0"
+    implementation "io.coil-kt:coil-compose:2.2.2"
     implementation "androidx.constraintlayout:constraintlayout-compose:1.0.1"
 
+    //ConnectSDK
     implementation 'com.github.ConnectSDK:Connect-SDK-Android:2.0.0'
+
+    //ExoPlayer
+    implementation 'androidx.media3:media3-exoplayer:1.0.0-beta02'
+    implementation 'androidx.media3:media3-ui:1.0.0-beta02'
 }

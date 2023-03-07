@@ -12,7 +12,7 @@ import dagger.hilt.components.SingletonComponent
 
 @Module
 @InstallIn(SingletonComponent::class)
-object DataModule {
+object Datamodule {
 
     @Provides
     fun provideMovieRepository(): MovieRepository = MovieRepositoryImpl()

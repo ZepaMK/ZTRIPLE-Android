@@ -13,8 +13,7 @@ class MovieRepositoryImpl @Inject constructor() : MovieRepository {
 
     override suspend fun getMovies(): Flow<Response<List<MovieItem>>> = callbackFlow {
         try {
-            val movies = listOf(MovieItem(1, "Big Buck Bunny", ""))
-            val response = Response.Success(movies)
+            val response = Response.Success(MOVIES)
             trySend(response)
         } catch (e: Exception) {
             Response.Failure(e)
@@ -24,10 +23,27 @@ class MovieRepositoryImpl @Inject constructor() : MovieRepository {
 
     override suspend fun getMovie(id: Int): Response<MovieItem> {
         return try {
-            val movie = MovieItem(1, "Big Buck Bunny", "")
+            val movie = MOVIES.single { it.id == id }
             Response.Success(movie)
         } catch (e: Exception) {
             Response.Failure(e)
         }
+    }
+
+    companion object {
+        val MOVIES = listOf(
+            MovieItem(
+                1,
+                "Big Buck Bunny",
+                "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/1280px-Big_buck_bunny_poster_big.jpg",
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+            ),
+            MovieItem(
+                2,
+                "Abraham Lincoln",
+                "https://upload.wikimedia.org/wikipedia/en/8/80/AbrahmaLincoln1930.jpg",
+                "https://upload.wikimedia.org/wikipedia/commons/2/2c/Abraham_Lincoln_%281930%29.webm"
+            )
+        )
     }
 }

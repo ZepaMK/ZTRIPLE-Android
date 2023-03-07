@@ -10,6 +10,7 @@
         tools:ignore="ScopedStorage" />
 
     <application
+        android:usesCleartextTraffic="true"
         android:allowBackup="true"
         android:name=".app.CoreApplication"
         android:dataExtractionRules="@xml/data_extraction_rules"

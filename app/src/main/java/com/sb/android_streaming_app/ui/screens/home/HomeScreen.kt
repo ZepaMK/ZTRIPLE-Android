@@ -10,10 +10,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.hilt.navigation.compose.hiltViewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.sb.android_streaming_app.data.models.MovieItem
 import com.sb.android_streaming_app.data.models.Response
 import com.sb.android_streaming_app.ui.components.ProgressBar
@@ -80,21 +80,19 @@ fun MovieItemCard(
 ) {
     Card(
         modifier = Modifier
-            .clickable { onClick(movieItem.id!!) }
-            .background(MaterialTheme.colors.onPrimary)
-            .fillMaxWidth()
-            .aspectRatio(1f)
-            .padding(5.dp),
+            .clickable { onClick(movieItem.id) }
+            .background(MaterialTheme.colors.primary)
+            .aspectRatio(0.8f),
         shape = MaterialTheme.shapes.large,
         elevation = 0.dp
     ) {
-        Box(contentAlignment = Alignment.Center) {
-            Text(
-                text = movieItem.title ?: "Menu category",
-                textAlign = TextAlign.Center,
-                fontSize = MaterialTheme.typography.h5.fontSize,
-                fontWeight = FontWeight.Medium
-            )
-        }
+        AsyncImage(
+            model = ImageRequest.Builder(LocalContext.current)
+                .data(movieItem.imageUrl)
+                .crossfade(true)
+                .build(),
+            contentDescription = null,
+            modifier = Modifier.background(MaterialTheme.colors.primary)
+        )
     }
 }

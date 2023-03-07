@@ -1,4 +1,4 @@
-package com.triple.androidstreamingapp.ui.screens.utils
+package com.sb.android_streaming_app.ui.utils
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home

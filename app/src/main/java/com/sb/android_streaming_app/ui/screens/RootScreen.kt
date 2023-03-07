@@ -26,7 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sb.android_streaming_app.ui.graph.RootNavGraph
 import com.sb.android_streaming_app.MainActivity
-import com.triple.androidstreamingapp.ui.screens.utils.BottomBarValues
+import com.sb.android_streaming_app.ui.utils.BottomBarValues
 
 @Composable
 fun RootScreen() {
