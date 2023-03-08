@@ -2,6 +2,7 @@ package com.sb.android_streaming_app.ui.screens
 
 import android.content.Context
 import android.content.ContextWrapper
+import android.util.Log
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -11,13 +12,17 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.DefaultTintColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.sb.android_streaming_app.R
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
@@ -26,10 +31,11 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sb.android_streaming_app.ui.graph.RootNavGraph
 import com.sb.android_streaming_app.MainActivity
+import com.sb.android_streaming_app.ui.components.ConnectedDialog
 import com.sb.android_streaming_app.ui.utils.BottomBarValues
 
 @Composable
-fun RootScreen() {
+fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
     val activity = LocalContext.current.findActivity()
     val navController = rememberNavController()
 
@@ -49,8 +55,12 @@ fun RootScreen() {
                 },
                 backgroundColor = MaterialTheme.colors.primary,
                 actions = {
-                    TopAppBarActionButton(imageVector = Icons.Outlined.Cast, description = "stream") {
-                        activity.toggleDevicePicker()
+                    TopAppBarActionButton(
+                        imageVector = Icons.Outlined.Cast,
+                        description = "stream",
+                        connected = viewModel.connected.value
+                    ) {
+                        if (viewModel.connected.value) viewModel.openDialog() else activity.toggleDevicePicker()
                     }
                 }
             )
@@ -58,6 +68,13 @@ fun RootScreen() {
         bottomBar = { BottomBar(navController = navController) }
     ) {
         RootNavGraph(navController = navController)
+        if (viewModel.connected.value) {
+            ConnectedDialog(
+                viewModel.connected,
+                viewModel.dialogOpen,
+                viewModel.mDevice!!,
+            ) { activity.deviceListener.onDeviceDisconnected(viewModel.mDevice) }
+        }
     }
 }
 
@@ -117,12 +134,17 @@ fun RowScope.AddItem(
 fun TopAppBarActionButton(
     imageVector: ImageVector,
     description: String,
-    onClick: () -> Unit
+    connected: Boolean,
+    onClick: () -> Unit,
 ) {
     IconButton(onClick = {
         onClick()
     }) {
-        Icon(imageVector = imageVector, contentDescription = description)
+        Icon(
+            imageVector = imageVector,
+            contentDescription = description,
+            tint = if (connected) Color.White else Color.DarkGray
+        )
     }
 }
 

@@ -5,50 +5,53 @@ import android.content.Context
 import android.os.Bundle
 import android.text.InputType
 import android.util.Log
-import android.view.MenuItem
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
+import androidx.lifecycle.ViewModelProvider
 import com.connectsdk.device.ConnectableDevice
 import com.connectsdk.device.ConnectableDeviceListener
 import com.connectsdk.device.DevicePicker
 import com.connectsdk.discovery.DiscoveryManager
+import com.connectsdk.discovery.DiscoveryManager.PairingLevel
 import com.connectsdk.service.DeviceService
 import com.connectsdk.service.DeviceService.PairingType
+import com.connectsdk.service.capability.VolumeControl
+import com.connectsdk.service.capability.VolumeControl.VolumeListener
 import com.connectsdk.service.command.ServiceCommandError
+import com.connectsdk.service.command.ServiceSubscription
 import com.sb.android_streaming_app.ui.app.App
+import com.sb.android_streaming_app.ui.screens.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
 
     private var mDiscoveryManager: DiscoveryManager? = null
-    private var mDevice: ConnectableDevice? = null
-    private var connectItem: MenuItem? = null
     private var dialog: AlertDialog? = null
     private var pairingAlertDialog: AlertDialog? = null
     private var pairingCodeDialog: AlertDialog? = null
     private var dp: DevicePicker? = null
+    private lateinit var viewModel: RootViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        DiscoveryManager.init(applicationContext)
         setContent {
             App()
         }
         supportActionBar?.hide()
         setupPicker()
-
+        viewModel = ViewModelProvider(this)[RootViewModel::class.java]
         mDiscoveryManager = DiscoveryManager.getInstance()
-        mDiscoveryManager!!.registerDefaultDeviceTypes();
-        mDiscoveryManager!!.pairingLevel = DiscoveryManager.PairingLevel.ON;
+        mDiscoveryManager!!.registerDefaultDeviceTypes()
+        mDiscoveryManager!!.pairingLevel = PairingLevel.ON
 
         DiscoveryManager.getInstance().start()
     }
 
-    private val deviceListener: ConnectableDeviceListener = object : ConnectableDeviceListener {
+     val deviceListener: ConnectableDeviceListener = object : ConnectableDeviceListener {
 
         override fun onDeviceReady(device: ConnectableDevice?) {
             Log.d("2ndScreenAPP", "onPairingSuccess")
@@ -58,17 +61,18 @@ class MainActivity : AppCompatActivity() {
             if (pairingCodeDialog!!.isShowing) {
                 pairingCodeDialog!!.dismiss()
             }
-            registerSuccess(mDevice)
+            registerSuccess(viewModel.mDevice)
         }
 
         override fun onDeviceDisconnected(device: ConnectableDevice?) {
             Log.d("2ndScreenAPP", "Device Disconnected")
-            connectEnded(mDevice)
+            viewModel.deviceDisconnected()
+            connectEnded(viewModel.mDevice)
             Toast.makeText(applicationContext, "Device Disconnected", Toast.LENGTH_SHORT).show()
         }
 
         override fun onPairingRequired(device: ConnectableDevice?, service: DeviceService?, pairingType: PairingType?) {
-            Log.d("2ndScreenAPP", "Connected to " + mDevice!!.ipAddress)
+            Log.d("2ndScreenAPP", "Connected to " + viewModel.mDevice!!.ipAddress)
 
             when (pairingType) {
                 PairingType.FIRST_SCREEN -> {
@@ -93,21 +97,23 @@ class MainActivity : AppCompatActivity() {
 
         override fun onConnectionFailed(device: ConnectableDevice?, error: ServiceCommandError?) {
             Log.d("2ndScreenAPP", "onConnectFailed")
-            connectFailed(mDevice)
+            connectFailed(viewModel.mDevice)
         }
     }
 
 
     private fun registerSuccess(device: ConnectableDevice?) {
+        viewModel.deviceConnected()
+        viewModel.openDialog()
         Log.d("2ndScreenAPP", "successful register")
     }
 
     private fun connectFailed(device: ConnectableDevice?) {
         if (device != null) Log.d("2ndScreenAPP", "Failed to connect to " + device.ipAddress)
-        if (mDevice != null) {
-            mDevice!!.removeListener(deviceListener)
-            mDevice!!.disconnect()
-            mDevice = null
+        if (viewModel.mDevice != null) {
+            viewModel.mDevice!!.removeListener(deviceListener)
+            viewModel.mDevice!!.disconnect()
+            viewModel.mDevice = null
         }
     }
 
@@ -118,9 +124,9 @@ class MainActivity : AppCompatActivity() {
         if (pairingCodeDialog!!.isShowing) {
             pairingCodeDialog!!.dismiss()
         }
-        if (!mDevice!!.isConnecting) {
-            mDevice!!.removeListener(deviceListener)
-            mDevice = null
+        if (!viewModel.mDevice!!.isConnecting) {
+            viewModel.mDevice!!.removeListener(deviceListener)
+            viewModel.mDevice = null
         }
     }
 
@@ -129,8 +135,8 @@ class MainActivity : AppCompatActivity() {
         if (dialog != null) {
             dialog!!.dismiss()
         }
-        if (mDevice != null) {
-            mDevice!!.disconnect()
+        if (viewModel.mDevice != null) {
+            viewModel.mDevice!!.disconnect()
         }
     }
 
@@ -141,12 +147,11 @@ class MainActivity : AppCompatActivity() {
     private fun setupPicker() {
         dp = DevicePicker(this)
         dialog = dp!!.getPickerDialog("Devices") { arg0, _, arg2, _ ->
-            mDevice = arg0.getItemAtPosition(arg2) as ConnectableDevice
-            mDevice!!.addListener(deviceListener)
-            mDevice!!.setPairingType(null)
-            mDevice!!.connect()
-            connectItem!!.title = mDevice!!.friendlyName
-            dp!!.pickDevice(mDevice)
+            viewModel.mDevice = arg0.getItemAtPosition(arg2) as ConnectableDevice
+            viewModel.mDevice!!.addListener(deviceListener)
+//            viewModel.mDevice!!.setPairingType(null)
+            viewModel.mDevice!!.connect()
+            dp!!.pickDevice(viewModel.mDevice)
         }
         pairingAlertDialog = AlertDialog.Builder(this)
             .setTitle("Pairing with TV")
@@ -165,9 +170,9 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Enter Pairing Code on TV")
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
-                if (mDevice != null) {
+                if (viewModel.mDevice != null) {
                     val value = input.text.toString().trim { it <= ' ' }
-                    mDevice!!.sendPairingKey(value)
+                    viewModel.mDevice!!.sendPairingKey(value)
                     imm.hideSoftInputFromWindow(input.windowToken, 0)
                 }
             }
