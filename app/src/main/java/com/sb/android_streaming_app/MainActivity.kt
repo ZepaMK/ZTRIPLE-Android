@@ -11,20 +11,25 @@ import android.widget.Toast
 import androidx.activity.compose.setContent
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.connectsdk.core.AppInfo
 import com.connectsdk.device.ConnectableDevice
 import com.connectsdk.device.ConnectableDeviceListener
 import com.connectsdk.device.DevicePicker
 import com.connectsdk.discovery.DiscoveryManager
 import com.connectsdk.discovery.DiscoveryManager.PairingLevel
+import com.connectsdk.discovery.provider.SSDPDiscoveryProvider
+import com.connectsdk.service.DIALService
 import com.connectsdk.service.DeviceService
 import com.connectsdk.service.DeviceService.PairingType
-import com.connectsdk.service.capability.VolumeControl
-import com.connectsdk.service.capability.VolumeControl.VolumeListener
+import com.connectsdk.service.capability.Launcher
+import com.connectsdk.service.capability.Launcher.AppLaunchListener
 import com.connectsdk.service.command.ServiceCommandError
-import com.connectsdk.service.command.ServiceSubscription
+import com.connectsdk.service.sessions.LaunchSession
+import com.sb.android_streaming_app.services.DService
 import com.sb.android_streaming_app.ui.app.App
 import com.sb.android_streaming_app.ui.screens.RootViewModel
 import dagger.hilt.android.AndroidEntryPoint
+import java.util.Locale
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
@@ -34,7 +39,10 @@ class MainActivity : AppCompatActivity() {
     private var pairingAlertDialog: AlertDialog? = null
     private var pairingCodeDialog: AlertDialog? = null
     private var dp: DevicePicker? = null
-    private lateinit var viewModel: RootViewModel
+    private var viewModel: RootViewModel? = null
+    private var launcher: Launcher? = null
+    private var dialService: DIALService? = null
+    private var runningAppSession: LaunchSession? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,15 +51,16 @@ class MainActivity : AppCompatActivity() {
         }
         supportActionBar?.hide()
         setupPicker()
-        viewModel = ViewModelProvider(this)[RootViewModel::class.java]
-        mDiscoveryManager = DiscoveryManager.getInstance()
-        mDiscoveryManager!!.registerDefaultDeviceTypes()
-        mDiscoveryManager!!.pairingLevel = PairingLevel.ON
 
-        DiscoveryManager.getInstance().start()
+        viewModel = ViewModelProvider(this)[RootViewModel::class.java]
+
+        mDiscoveryManager = DiscoveryManager.getInstance()
+        mDiscoveryManager!!.registerDeviceService(DIALService::class.java, SSDPDiscoveryProvider::class.java)
+        mDiscoveryManager!!.pairingLevel = PairingLevel.ON
+        mDiscoveryManager!!.start()
     }
 
-     val deviceListener: ConnectableDeviceListener = object : ConnectableDeviceListener {
+    val deviceListener: ConnectableDeviceListener = object : ConnectableDeviceListener {
 
         override fun onDeviceReady(device: ConnectableDevice?) {
             Log.d("2ndScreenAPP", "onPairingSuccess")
@@ -61,18 +70,18 @@ class MainActivity : AppCompatActivity() {
             if (pairingCodeDialog!!.isShowing) {
                 pairingCodeDialog!!.dismiss()
             }
-            registerSuccess(viewModel.mDevice)
+            registerSuccess(viewModel!!.mDevice)
         }
 
         override fun onDeviceDisconnected(device: ConnectableDevice?) {
             Log.d("2ndScreenAPP", "Device Disconnected")
-            viewModel.deviceDisconnected()
-            connectEnded(viewModel.mDevice)
+            viewModel!!.deviceDisconnected()
+            connectEnded(viewModel!!.mDevice)
             Toast.makeText(applicationContext, "Device Disconnected", Toast.LENGTH_SHORT).show()
         }
 
         override fun onPairingRequired(device: ConnectableDevice?, service: DeviceService?, pairingType: PairingType?) {
-            Log.d("2ndScreenAPP", "Connected to " + viewModel.mDevice!!.ipAddress)
+            Log.d("2ndScreenAPP", "Connected to " + viewModel!!.mDevice!!.ipAddress)
 
             when (pairingType) {
                 PairingType.FIRST_SCREEN -> {
@@ -97,23 +106,35 @@ class MainActivity : AppCompatActivity() {
 
         override fun onConnectionFailed(device: ConnectableDevice?, error: ServiceCommandError?) {
             Log.d("2ndScreenAPP", "onConnectFailed")
-            connectFailed(viewModel.mDevice)
+            connectFailed(viewModel!!.mDevice)
         }
     }
 
 
     private fun registerSuccess(device: ConnectableDevice?) {
-        viewModel.deviceConnected()
-        viewModel.openDialog()
+        launcher = device!!.getCapability(Launcher::class.java)
+        dialService = device.getCapability(DIALService::class.java)
+
+        viewModel!!.deviceConnected()
+        viewModel!!.openDialog()
+
+        launcher!!.launchNetflix("70217913", object : AppLaunchListener {
+            override fun onSuccess(session: LaunchSession) {
+                setRunningAppInfo(session)
+            }
+
+            override fun onError(error: ServiceCommandError) {}
+        })
+
         Log.d("2ndScreenAPP", "successful register")
     }
 
     private fun connectFailed(device: ConnectableDevice?) {
         if (device != null) Log.d("2ndScreenAPP", "Failed to connect to " + device.ipAddress)
-        if (viewModel.mDevice != null) {
-            viewModel.mDevice!!.removeListener(deviceListener)
-            viewModel.mDevice!!.disconnect()
-            viewModel.mDevice = null
+        if (viewModel!!.mDevice != null) {
+            viewModel!!.mDevice!!.removeListener(deviceListener)
+            viewModel!!.mDevice!!.disconnect()
+            viewModel!!.mDevice = null
         }
     }
 
@@ -124,10 +145,11 @@ class MainActivity : AppCompatActivity() {
         if (pairingCodeDialog!!.isShowing) {
             pairingCodeDialog!!.dismiss()
         }
-        if (!viewModel.mDevice!!.isConnecting) {
-            viewModel.mDevice!!.removeListener(deviceListener)
-            viewModel.mDevice = null
+        if (!viewModel!!.mDevice!!.isConnecting) {
+            viewModel!!.mDevice!!.removeListener(deviceListener)
+            viewModel!!.mDevice = null
         }
+
     }
 
     override fun onDestroy() {
@@ -135,8 +157,8 @@ class MainActivity : AppCompatActivity() {
         if (dialog != null) {
             dialog!!.dismiss()
         }
-        if (viewModel.mDevice != null) {
-            viewModel.mDevice!!.disconnect()
+        if (viewModel!!.mDevice != null) {
+            viewModel!!.mDevice!!.disconnect()
         }
     }
 
@@ -147,11 +169,10 @@ class MainActivity : AppCompatActivity() {
     private fun setupPicker() {
         dp = DevicePicker(this)
         dialog = dp!!.getPickerDialog("Devices") { arg0, _, arg2, _ ->
-            viewModel.mDevice = arg0.getItemAtPosition(arg2) as ConnectableDevice
-            viewModel.mDevice!!.addListener(deviceListener)
-//            viewModel.mDevice!!.setPairingType(null)
-            viewModel.mDevice!!.connect()
-            dp!!.pickDevice(viewModel.mDevice)
+            viewModel!!.mDevice = arg0.getItemAtPosition(arg2) as ConnectableDevice
+            viewModel!!.mDevice!!.addListener(deviceListener)
+            viewModel!!.mDevice!!.connect()
+            dp!!.pickDevice(viewModel!!.mDevice)
         }
         pairingAlertDialog = AlertDialog.Builder(this)
             .setTitle("Pairing with TV")
@@ -170,9 +191,9 @@ class MainActivity : AppCompatActivity() {
             .setTitle("Enter Pairing Code on TV")
             .setView(input)
             .setPositiveButton(R.string.ok) { _, _ ->
-                if (viewModel.mDevice != null) {
+                if (viewModel!!.mDevice != null) {
                     val value = input.text.toString().trim { it <= ' ' }
-                    viewModel.mDevice!!.sendPairingKey(value)
+                    viewModel!!.mDevice!!.sendPairingKey(value)
                     imm.hideSoftInputFromWindow(input.windowToken, 0)
                 }
             }
@@ -182,5 +203,9 @@ class MainActivity : AppCompatActivity() {
                 imm.hideSoftInputFromWindow(input.windowToken, 0)
             }
             .create()
+    }
+
+    fun setRunningAppInfo(session: LaunchSession) {
+        runningAppSession = session
     }
 }

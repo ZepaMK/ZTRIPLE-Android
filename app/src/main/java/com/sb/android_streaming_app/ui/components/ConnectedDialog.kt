@@ -36,7 +36,6 @@ fun ConnectedDialog(
     device: ConnectableDevice,
     onDisconnect: () -> Unit,
 ) {
-    val volumeControl = device.getCapability(VolumeControl::class.java)
     var sliderPosition by remember { mutableStateOf(0f) }
 
     if (dialogOpen.value && connected.value) {
@@ -78,7 +77,7 @@ fun ConnectedDialog(
                         valueRange = 0f..100f,
                         enabled = device.hasCapabilities(VolumeControl.Volume_Set),
                         onValueChangeFinished = {
-                            volumeControl.setVolume(sliderPosition / 100, null)
+                         //TODO
                         },
                         steps = 0,
                         colors = SliderDefaults.colors(
