@@ -1,5 +1,6 @@
 package com.sb.android_streaming_app.ui.screens.detail
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -26,6 +27,10 @@ import com.sb.android_streaming_app.data.models.MovieItem
 import com.sb.android_streaming_app.data.models.Response
 import com.sb.android_streaming_app.ui.components.ProgressBar
 
+/**
+ * Created by Zep S. on 07/03/2023.
+ */
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun DetailScreen(
     id: Int,
@@ -57,7 +62,7 @@ fun Detail(
     viewModel.fetchMovie(id)
     when (val detailResponse = viewModel.moviesResponse) {
         is Response.Loading -> ProgressBar()
-        is Response.Success ->  {
+        is Response.Success -> {
             detailContent(detailResponse.data)
             viewModel.playVideo(detailResponse.data.movieUrl)
         }

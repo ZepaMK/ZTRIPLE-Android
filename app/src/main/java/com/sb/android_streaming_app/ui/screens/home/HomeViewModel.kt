@@ -12,6 +12,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
 @HiltViewModel
 class HomeViewModel @Inject constructor(
     private val getMovies: GetMovies,

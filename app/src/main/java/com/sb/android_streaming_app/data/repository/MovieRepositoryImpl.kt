@@ -8,6 +8,9 @@ import kotlinx.coroutines.flow.callbackFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
 @Singleton
 class MovieRepositoryImpl @Inject constructor() : MovieRepository {
 
@@ -30,6 +33,7 @@ class MovieRepositoryImpl @Inject constructor() : MovieRepository {
         }
     }
 
+    //Dummy data
     companion object {
         val MOVIES = listOf(
             MovieItem(

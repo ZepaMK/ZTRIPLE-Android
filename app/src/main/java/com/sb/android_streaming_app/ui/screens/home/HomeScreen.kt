@@ -1,5 +1,6 @@
 package com.sb.android_streaming_app.ui.screens.home
 
+import android.annotation.SuppressLint
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -18,6 +19,10 @@ import com.sb.android_streaming_app.data.models.MovieItem
 import com.sb.android_streaming_app.data.models.Response
 import com.sb.android_streaming_app.ui.components.ProgressBar
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun HomeScreen(onClick: (Int) -> Unit) {
     Scaffold(

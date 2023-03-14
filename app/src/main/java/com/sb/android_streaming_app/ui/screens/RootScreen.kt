@@ -1,8 +1,6 @@
 package com.sb.android_streaming_app.ui.screens
 
-import android.content.Context
-import android.content.ContextWrapper
-import android.util.Log
+import android.annotation.SuppressLint
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -12,13 +10,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Cast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.DefaultTintColor
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import com.sb.android_streaming_app.R
 import androidx.compose.ui.unit.dp
@@ -30,13 +25,15 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.sb.android_streaming_app.ui.graph.RootNavGraph
-import com.sb.android_streaming_app.MainActivity
 import com.sb.android_streaming_app.ui.components.ConnectedDialog
-import com.sb.android_streaming_app.ui.utils.BottomBarValues
+import com.sb.android_streaming_app.ui.graph.NavConstants
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
-    val activity = LocalContext.current.findActivity()
     val navController = rememberNavController()
 
     Scaffold(
@@ -60,7 +57,7 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
                         description = "stream",
                         connected = viewModel.connected.value
                     ) {
-                        if (viewModel.connected.value) viewModel.openDialog() else activity.toggleDevicePicker()
+                        if (viewModel.connected.value) viewModel.openConnectedDialog() else viewModel.openDevicePicker()
                     }
                 }
             )
@@ -72,8 +69,8 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
             ConnectedDialog(
                 viewModel.connected,
                 viewModel.dialogOpen,
-                viewModel.mDevice!!,
-            ) { activity.deviceListener.onDeviceDisconnected(viewModel.mDevice) }
+                viewModel.device,
+            ) { viewModel.deviceDisconnected() }
         }
     }
 }
@@ -81,8 +78,7 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
 @Composable
 fun BottomBar(navController: NavHostController) {
     val screens = listOf(
-        BottomBarValues.Home,
-        BottomBarValues.Settings,
+        NavConstants.Home,
     )
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val currentDestination = navBackStackEntry?.destination
@@ -103,7 +99,7 @@ fun BottomBar(navController: NavHostController) {
 
 @Composable
 fun RowScope.AddItem(
-    screen: BottomBarValues,
+    screen: NavConstants,
     currentDestination: NavDestination?,
     navController: NavHostController
 ) {
@@ -146,13 +142,4 @@ fun TopAppBarActionButton(
             tint = if (connected) Color.White else Color.DarkGray
         )
     }
-}
-
-internal fun Context.findActivity(): MainActivity {
-    var context = this
-    while (context is ContextWrapper) {
-        if (context is MainActivity) return context
-        context = context.baseContext
-    }
-    throw IllegalStateException("no activity")
 }

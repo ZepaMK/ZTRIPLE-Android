@@ -28,6 +28,9 @@ import androidx.compose.ui.window.DialogProperties
 import com.connectsdk.device.ConnectableDevice
 import com.connectsdk.service.capability.VolumeControl
 
+/**
+ * Created by Zep S. on 08/03/2023.
+ */
 @OptIn(ExperimentalComposeUiApi::class)
 @Composable
 fun ConnectedDialog(

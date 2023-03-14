@@ -8,6 +8,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
 @Composable
 fun ProgressBar() {
     Box(

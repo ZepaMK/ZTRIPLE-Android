@@ -10,6 +10,9 @@ import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
 
+/**
+ * Created by Zep S. on 03/03/2023.
+ */
 @Module
 @InstallIn(SingletonComponent::class)
 object Datamodule {
