@@ -9,10 +9,11 @@ import com.connectsdk.device.ConnectableDeviceListener
 import com.connectsdk.service.DIALService
 import com.connectsdk.service.DeviceService
 import com.connectsdk.service.DeviceService.PairingType
-import com.connectsdk.service.capability.Launcher
 import com.connectsdk.service.command.ServiceCommandError
 import com.connectsdk.service.sessions.LaunchSession
 import com.sb.android_streaming_app.ui.screens.RootViewModel
+import java.net.HttpURLConnection
+import java.net.URL
 
 /**
  * Created by Zep S. on 14/03/2023.
@@ -38,8 +39,8 @@ class DeviceListener(
 
     // Callback for when the device is disconnected
     override fun onDeviceDisconnected(device: ConnectableDevice) {
-        Log.d(TAG, "Device is disconnected.")
-        connectionEnded(mutableStateOf(device))
+        Log.d("2ndScreenAPP", "Device is disconnected.")
+        connectionEnded(device)
     }
 
     // Callback for when pairing is required for the device
@@ -87,22 +88,11 @@ class DeviceListener(
      * @param device The device that was successfully connected to.
      */
     private fun registerSuccess(device: ConnectableDevice?) {
+        Log.d("2ndScreenAPP", "successful connection")
         device?.let { nonNullDevice ->
-            val launcher = nonNullDevice.getCapability(Launcher::class.java)
             dialService = nonNullDevice.getCapability(DIALService::class.java)
             viewModel.deviceConnected()
-            viewModel.openConnectedDialog()
-            launcher.launchNetflix("70217913", object : Launcher.AppLaunchListener {
-                override fun onSuccess(session: LaunchSession) {
-                    setRunningAppInfo(session)
-                    Log.d("2ndScreenAPP", "successful launch")
-                }
-
-                override fun onError(error: ServiceCommandError) {
-                    Log.d("2ndScreenAPP", "unsuccessful launch")
-                }
-            })
-            Log.d("2ndScreenAPP", "successful connection")
+            viewModel.launchApplication(dialService)
         }
     }
 
@@ -113,13 +103,12 @@ class DeviceListener(
      *
      * @param device The device that was being connected to.
      */
-    private fun connectionEnded(device: MutableState<ConnectableDevice?>) {
+    private fun connectionEnded(device: ConnectableDevice) {
         pairingAlertDialog.dismiss()
         pairingCodeDialog.dismiss()
         device.apply {
-            value?.disconnect()
-            value?.removeListener(this@DeviceListener)
-            device.value = null
+            disconnect()
+            removeListener(this@DeviceListener)
         }
     }
 
