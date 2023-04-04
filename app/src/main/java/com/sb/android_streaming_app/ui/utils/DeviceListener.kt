@@ -20,8 +20,6 @@ import java.net.URL
  */
 class DeviceListener(
     private val viewModel: RootViewModel,
-    private val pairingAlertDialog: AlertDialog,
-    private val pairingCodeDialog: AlertDialog,
 ) : ConnectableDeviceListener {
 
     private lateinit var dialService: DIALService
@@ -30,9 +28,6 @@ class DeviceListener(
     // Callback for when the device is ready for connection
     override fun onDeviceReady(device: ConnectableDevice) {
         Log.d(TAG, "Device is ready for connection.")
-        // Dismiss any pairing dialogs that are showing
-        if (pairingAlertDialog.isShowing) pairingAlertDialog.dismiss()
-        if (pairingCodeDialog.isShowing) pairingCodeDialog.dismiss()
         // Register the device as successfully connected
         registerSuccess(device)
     }
@@ -46,20 +41,6 @@ class DeviceListener(
     // Callback for when pairing is required for the device
     override fun onPairingRequired(device: ConnectableDevice?, service: DeviceService?, pairingType: PairingType?) {
         Log.d(TAG, "Pairing is required for device: ${device?.ipAddress}")
-
-        // Show the appropriate pairing dialog based on the pairing type
-        when (pairingType) {
-            PairingType.FIRST_SCREEN -> {
-                Log.d(TAG, "Pairing Type: First Screen")
-                pairingAlertDialog.show()
-            }
-            PairingType.PIN_CODE, PairingType.MIXED -> {
-                Log.d(TAG, "Pairing Type: Pin Code")
-                pairingCodeDialog.show()
-            }
-            // Ignore any other pairing types
-            else -> {}
-        }
     }
 
     // Callback for when device capabilities are updated
@@ -92,6 +73,7 @@ class DeviceListener(
         device?.let { nonNullDevice ->
             dialService = nonNullDevice.getCapability(DIALService::class.java)
             viewModel.deviceConnected()
+            viewModel.lauched.value = 1
             viewModel.launchApplication(dialService)
         }
     }
@@ -104,8 +86,6 @@ class DeviceListener(
      * @param device The device that was being connected to.
      */
     private fun connectionEnded(device: ConnectableDevice) {
-        pairingAlertDialog.dismiss()
-        pairingCodeDialog.dismiss()
         device.apply {
             disconnect()
             removeListener(this@DeviceListener)

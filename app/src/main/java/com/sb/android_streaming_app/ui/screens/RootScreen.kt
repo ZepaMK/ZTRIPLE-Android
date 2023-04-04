@@ -77,14 +77,14 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
                 viewModel.connected,
                 viewModel.dialogOpen,
                 viewModel.device,
-            ) { viewModel.deviceDisconnected() }
+            ) { viewModel.deviceDisconnected(false) }
         }
         Log.d("2ndScreenAPP", viewModel.lauched.value.toString())
-        if (viewModel.connected.value) {
-            when (viewModel.lauched.value) {
-                1 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App launched on ${viewModel.device.friendlyName}.") }
-                2 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App could not launch, did you install the app on your TV?") }
-            }
+
+        when (viewModel.lauched.value) {
+            1 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "Connecting to ${viewModel.device.friendlyName}") }
+            2 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App launched on ${viewModel.device.friendlyName}") }
+            3 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App could not launch, did you install the app on your TV?") }
         }
     }
 }

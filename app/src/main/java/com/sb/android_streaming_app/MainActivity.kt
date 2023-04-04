@@ -34,14 +34,6 @@ class MainActivity : AppCompatActivity() {
         // Initialize the root view model using the ViewModelProvider
         viewModel = ViewModelProvider(this)[RootViewModel::class.java]
 
-        // Initialize device Picker
-        val dp = DevicePicker(this)
-
-        // Setup the device picker
-        val devicePickerHelper =
-            DevicePickerHelper(applicationContext, viewModel)
-        devicePickerHelper.setupPicker(dp)
-
         // Initialize the discovery manager to find devices on the same Wi-Fi network
         discoveryManager = DiscoveryManager.getInstance().apply {
             // Register the DIALService class with the SSDPDiscoveryProvider class for device discovery
@@ -53,6 +45,13 @@ class MainActivity : AppCompatActivity() {
             // Start device discovery
             start()
         }
+
+        // Initialize device Picker
+        val dp = DevicePicker(this)
+
+        // Setup the device picker
+        val devicePickerHelper = DevicePickerHelper(viewModel)
+        devicePickerHelper.setupPicker(dp)
 
         // Create a DeviceListener with the necessary parameters.
         viewModel.setDeviceListener()

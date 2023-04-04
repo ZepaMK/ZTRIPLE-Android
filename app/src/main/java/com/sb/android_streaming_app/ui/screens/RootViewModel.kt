@@ -30,47 +30,49 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RootViewModel @Inject constructor(
-
 ) : ViewModel() {
 
+    // Lateinit variables for ConnectableDevice, DeviceListener
     lateinit var device: ConnectableDevice
     lateinit var deviceListener: DeviceListener
     lateinit var dialog: AlertDialog
-    lateinit var pairingAlertDialog: AlertDialog
-    lateinit var pairingCodeDialog: AlertDialog
 
+    // Mutable state variables to observe changes in view
     var connected = mutableStateOf(false)
     var dialogOpen = mutableStateOf(false)
     var lauched = mutableStateOf(0)
 
-
+    // Function to set DeviceListener
     fun setDeviceListener() {
-        deviceListener = DeviceListener(
-            viewModel = this,
-            pairingAlertDialog = pairingAlertDialog,
-            pairingCodeDialog = pairingCodeDialog,
-        )
+        deviceListener = DeviceListener(this)
     }
 
+    // Function to indicate device is connected
     fun deviceConnected() {
         connected.value = true
     }
 
-    fun deviceDisconnected() {
+    // Function to indicate device is disconnected and update mutable state variables accordingly
+    fun deviceDisconnected(launchFailed: Boolean) {
+        if (launchFailed) lauched.value = 3 else lauched.value = 0
         deviceListener.onDeviceDisconnected(device)
         connected.value = false
-        lauched.value = 4
+        dialogOpen.value = false
     }
 
+    // Function to open Connected Dialog
     fun openConnectedDialog() {
         dialogOpen.value = true
     }
 
+    // Function to open Device Picker Dialog
     fun openDevicePicker() {
         dialog.show()
     }
 
+    // Function to launch application using DIALService
     fun launchApplication(service: DIALService) {
+
         CoroutineScope(Dispatchers.IO).launch {
             val client = OkHttpClient()
 
@@ -79,19 +81,21 @@ class RootViewModel @Inject constructor(
                 .post(ByteArray(0).toRequestBody(null, 0, 0))
                 .build()
 
+            Log.d("2ndScreenAPP", request.url.toString())
+
             val response = client.newCall(request).execute()
 
             if (response.code == 200) {
                 Log.d("2ndScreenAPP", "App launch successful")
-                lauched.value = 1
-            } else {
-                Log.d("2ndScreenAPP", "App launch  unsuccessful")
                 lauched.value = 2
-                deviceDisconnected()
+            } else {
+                Log.d("2ndScreenAPP", "App launch unsuccessful")
+                deviceDisconnected(true)
             }
         }
     }
 
+    // Function to generate URL based on DIALService manufacturer
     private fun generateURL(service: DIALService): String {
         val url: String = when (service.serviceDescription.manufacturer) {
             SAMSUNG -> String.format(SAMSUNG_URL_TEMPLATE, service.serviceDescription.ipAddress, ID)
@@ -105,7 +109,6 @@ class RootViewModel @Inject constructor(
         private const val SAMSUNG = "Samsung Electronics"
         private const val SAMSUNG_URL_TEMPLATE = "http://%s:8001/api/v2/applications/%s"
         private const val LG = "LG Electronics"
-        private const val ID = "azFWqejcXJ.NLZie"
+        private const val ID = "azFWqejcXJ.NLZiet"
     }
 }
-
