@@ -2,12 +2,8 @@ package com.sb.android_streaming_app.ui.screens
 
 import android.app.AlertDialog
 import android.util.Log
-import android.widget.Toast
 import androidx.compose.runtime.mutableStateOf
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import coil.network.HttpException
 import com.connectsdk.device.ConnectableDevice
 import com.connectsdk.service.DIALService
 import com.connectsdk.service.capability.Launcher.AppLaunchListener
@@ -15,15 +11,15 @@ import com.connectsdk.service.command.ServiceCommandError
 import com.connectsdk.service.sessions.LaunchSession
 import com.sb.android_streaming_app.ui.utils.DeviceListener
 import dagger.hilt.android.lifecycle.HiltViewModel
-import khttp.post
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import okhttp3.Request
-import okhttp3.RequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import java.io.BufferedReader
+import java.io.InputStreamReader
+import java.io.OutputStream
 import java.net.HttpURLConnection
 import java.net.URL
 import javax.inject.Inject
@@ -72,34 +68,45 @@ class RootViewModel @Inject constructor(
 
     // Function to launch application using DIALService
     fun launchApplication(service: DIALService) {
+//        CoroutineScope(Dispatchers.IO).launch {
+//            val client = OkHttpClient()
+//
+//            val request = Request.Builder()
+//                .url(generateURL(service))
+//                .post(ByteArray(0).toRequestBody(null, 0, 0))
+//                .build()
+//
+//            Log.d("2ndScreenAPP", request.url.toString())
+//
+//            val response = client.newCall(request).execute()
+//
+//            if (response.code == 200) {
+//                Log.d("2ndScreenAPP", "App launch successful")
+//                lauched.value = 2
+//            } else {
+//                Log.d("2ndScreenAPP", "App launch unsuccessful")
+//                deviceDisconnected(true)
+//            }
+//        }
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val client = OkHttpClient()
-
-            val request = Request.Builder()
-                .url(generateURL(service))
-                .post(ByteArray(0).toRequestBody(null, 0, 0))
-                .build()
-
-            Log.d("2ndScreenAPP", request.url.toString())
-
-            val response = client.newCall(request).execute()
-
-            if (response.code == 200) {
-                Log.d("2ndScreenAPP", "App launch successful")
-                lauched.value = 2
-            } else {
-                Log.d("2ndScreenAPP", "App launch unsuccessful")
+        service.launcher.launchApp("ztriple", object : AppLaunchListener {
+            override fun onError(error: ServiceCommandError?) {
+                Log.d("2ndScreenAPP", "App launch unsuccessful: ${error?.message}")
                 deviceDisconnected(true)
             }
-        }
+
+            override fun onSuccess(`object`: LaunchSession?) {
+                Log.d("2ndScreenAPP", "App launch successful")
+                lauched.value = 2
+            }
+
+        })
     }
 
     // Function to generate URL based on DIALService manufacturer
     private fun generateURL(service: DIALService): String {
         val url: String = when (service.serviceDescription.manufacturer) {
-            SAMSUNG -> String.format(SAMSUNG_URL_TEMPLATE, service.serviceDescription.ipAddress, ID)
-            LG -> String.format("LG")
+            SAMSUNG -> String.format(SAMSUNG_URL_TEMPLATE, service.serviceDescription.ipAddress, SAMSUNG_APP_ID)
             else -> ""
         }
         return url
@@ -108,7 +115,6 @@ class RootViewModel @Inject constructor(
     companion object {
         private const val SAMSUNG = "Samsung Electronics"
         private const val SAMSUNG_URL_TEMPLATE = "http://%s:8001/api/v2/applications/%s"
-        private const val LG = "LG Electronics"
-        private const val ID = "azFWqejcXJ.NLZiet"
+        private const val SAMSUNG_APP_ID = "azFWqejcXJ.NLZiet"
     }
 }
