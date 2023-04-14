@@ -12,6 +12,7 @@ import com.connectsdk.service.DIALService
 import com.sb.android_streaming_app.ui.app.App
 import com.sb.android_streaming_app.ui.screens.RootViewModel
 import com.sb.android_streaming_app.ui.utils.DevicePickerHelper
+import com.sb.android_streaming_app.ui.utils.SocketHandler
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint

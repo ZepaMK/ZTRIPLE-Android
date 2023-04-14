@@ -105,9 +105,15 @@ dependencies {
     //ConnectSDK
     implementation 'com.github.ConnectSDK:Connect-SDK-Android:2.0.0'
 
+    //SocketIO
+    implementation ('io.socket:socket.io-client:2.0.0') {
+        exclude group: 'org.json', module: 'json'
+    }
+
     //ExoPlayer
     implementation 'androidx.media3:media3-exoplayer:1.0.0-beta02'
     implementation 'androidx.media3:media3-ui:1.0.0-beta02'
+
 
     //khttp
     implementation 'com.github.jkcclemens:khttp:0.1.0'

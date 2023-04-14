@@ -2,12 +2,14 @@ package com.sb.android_streaming_app.ui.screens
 
 import android.annotation.SuppressLint
 import android.util.Log
+import androidx.activity.compose.LocalOnBackPressedDispatcherOwner
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.outlined.Cast
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -42,6 +44,11 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
     val scaffoldState: ScaffoldState = rememberScaffoldState()
     val coroutineScope: CoroutineScope = rememberCoroutineScope()
 
+    val dispatcher = LocalOnBackPressedDispatcherOwner.current!!.onBackPressedDispatcher
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    val currentRoute = navBackStackEntry?.destination
+
+
     Scaffold(
         backgroundColor = MaterialTheme.colors.primary,
         scaffoldState = scaffoldState,
@@ -50,11 +57,19 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
                 {
                     Box(
                         modifier = Modifier
-                            .padding(start = 40.dp)
                             .fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(text = stringResource(id = R.string.app_name))
+                    }
+                },
+                navigationIcon = {
+                    if (currentRoute?.route == "MOVIE/{id}") {
+                        IconButton(onClick = {
+                            dispatcher.onBackPressed()
+                        }) {
+                            Icon(imageVector = Icons.Filled.ArrowBack, contentDescription = "Go Back")
+                        }
                     }
                 },
                 backgroundColor = MaterialTheme.colors.primary,
@@ -71,7 +86,7 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
         },
         bottomBar = { BottomBar(navController = navController) }
     ) {
-        RootNavGraph(navController = navController)
+        RootNavGraph(navController = navController, device = if (viewModel.connected.value) viewModel.device.friendlyName else "")
         if (viewModel.connected.value) {
             ConnectedDialog(
                 viewModel.connected,

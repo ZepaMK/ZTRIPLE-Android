@@ -65,6 +65,7 @@ class DeviceListener(
             dialService = nonNullDevice.getCapability(DIALService::class.java)
             viewModel.deviceConnected()
             viewModel.lauched.value = 1
+
             Log.d("2ndScreenAPP", dialService.serviceDescription.applicationURL)
             viewModel.launchApplication(dialService)
         }
@@ -72,6 +73,7 @@ class DeviceListener(
 
     private fun endConnection(device: ConnectableDevice?) {
         device?.apply {
+            SocketHandler.closeConnection()
             disconnect()
             removeListener(this@DeviceListener)
         }

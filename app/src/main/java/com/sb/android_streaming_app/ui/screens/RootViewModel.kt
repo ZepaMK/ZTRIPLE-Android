@@ -10,6 +10,7 @@ import com.connectsdk.service.capability.Launcher.AppLaunchListener
 import com.connectsdk.service.command.ServiceCommandError
 import com.connectsdk.service.sessions.LaunchSession
 import com.sb.android_streaming_app.ui.utils.DeviceListener
+import com.sb.android_streaming_app.ui.utils.SocketHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -89,18 +90,25 @@ class RootViewModel @Inject constructor(
 //            }
 //        }
 
-        service.launcher.launchApp("ztriple", object : AppLaunchListener {
-            override fun onError(error: ServiceCommandError?) {
-                Log.d("2ndScreenAPP", "App launch unsuccessful: ${error?.message}")
-                deviceDisconnected(true)
-            }
+        SocketHandler.setSocket("192.168.178.120")
+        SocketHandler.establishConnection()
+        lauched.value = 2
 
-            override fun onSuccess(`object`: LaunchSession?) {
-                Log.d("2ndScreenAPP", "App launch successful")
-                lauched.value = 2
-            }
-
-        })
+//        service.launchApp("Netflix", object : AppLaunchListener {
+//            override fun onError(error: ServiceCommandError?) {
+//                Log.d("2ndScreenAPP", "App launch unsuccessful: ${error?.message}")
+//                deviceDisconnected(true)
+//            }
+//
+//            override fun onSuccess(`object`: LaunchSession?) {
+//                Log.d("2ndScreenAPP", "App launch successful")
+//                SocketHandler.setSocket("192.168.178.120")
+//                SocketHandler.establishConnection()
+//                lauched.value = 2
+//
+//            }
+//
+//        })
     }
 
     // Function to generate URL based on DIALService manufacturer
@@ -113,6 +121,7 @@ class RootViewModel @Inject constructor(
     }
 
     companion object {
+        private const val APP_ID = "ztriple"
         private const val SAMSUNG = "Samsung Electronics"
         private const val SAMSUNG_URL_TEMPLATE = "http://%s:8001/api/v2/applications/%s"
         private const val SAMSUNG_APP_ID = "azFWqejcXJ.NLZiet"

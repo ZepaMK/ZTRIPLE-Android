@@ -84,7 +84,6 @@ fun ConnectedDialog(
                         },
                         steps = 0,
                         colors = SliderDefaults.colors(
-
                             thumbColor = Color.White,
                             activeTrackColor = Color.White,
                             inactiveTickColor = Color.DarkGray
