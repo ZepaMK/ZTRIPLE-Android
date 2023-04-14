@@ -86,7 +86,10 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
         },
         bottomBar = { BottomBar(navController = navController) }
     ) {
-        RootNavGraph(navController = navController, device = if (viewModel.connected.value) viewModel.device.friendlyName else "")
+        RootNavGraph(
+            navController = navController,
+            device = if (viewModel.connected.value) viewModel.device.friendlyName else ""
+        )
         if (viewModel.connected.value) {
             ConnectedDialog(
                 viewModel.connected,
@@ -94,14 +97,35 @@ fun RootScreen(viewModel: RootViewModel = hiltViewModel()) {
                 viewModel.device,
             ) { viewModel.deviceDisconnected(false) }
         }
-        Log.d("2ndScreenAPP", viewModel.lauched.value.toString())
 
         when (viewModel.lauched.value) {
-            1 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "Connecting to ${viewModel.device.friendlyName}") }
-            2 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App launched on ${viewModel.device.friendlyName}") }
-            3 -> coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = "App could not launch, did you install the app on your TV?") }
+            1 -> showSnackBar(
+                coroutineScope,
+                scaffoldState,
+                viewModel,
+                "Connecting to ${viewModel.device.friendlyName}"
+            )
+
+            2 -> showSnackBar(
+                coroutineScope,
+                scaffoldState,
+                viewModel,
+                "App launched on ${viewModel.device.friendlyName}"
+            )
+
+            3 -> showSnackBar(
+                coroutineScope,
+                scaffoldState,
+                viewModel,
+                "App could not launch, did you install the app on your TV?"
+            )
         }
     }
+}
+
+fun showSnackBar(coroutineScope: CoroutineScope, scaffoldState: ScaffoldState, viewModel: RootViewModel, text: String) {
+    coroutineScope.launch { scaffoldState.snackbarHostState.showSnackbar(message = text) }
+    viewModel.lauched.value = 0
 }
 
 @Composable

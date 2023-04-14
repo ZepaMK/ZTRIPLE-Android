@@ -112,6 +112,6 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel) {
                 .fillMaxWidth()
                 .aspectRatio(16 / 9f)
         )
-        Text(text = detail.title)
+        Text(text = detail.title, modifier = Modifier.padding(top = 8.dp))
     }
 }
