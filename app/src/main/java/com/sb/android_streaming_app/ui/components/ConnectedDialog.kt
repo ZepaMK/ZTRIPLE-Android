@@ -1,5 +1,7 @@
 package com.sb.android_streaming_app.ui.components
 
+import android.media.MediaMetadataRetriever
+import android.media.MediaMetadataRetriever.METADATA_KEY_DURATION
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -80,7 +82,7 @@ fun ConnectedDialog(
                         valueRange = 0f..100f,
                         enabled = device.hasCapabilities(VolumeControl.Volume_Set),
                         onValueChangeFinished = {
-                         //TODO
+                            //TODO
                         },
                         steps = 0,
                         colors = SliderDefaults.colors(

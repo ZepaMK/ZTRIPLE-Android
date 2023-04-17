@@ -115,6 +115,6 @@ dependencies {
     implementation 'androidx.media3:media3-ui:1.0.0-beta02'
 
 
-    //khttp
+    //khttp can be removed later
     implementation 'com.github.jkcclemens:khttp:0.1.0'
 }

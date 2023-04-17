@@ -40,7 +40,7 @@ class MovieRepositoryImpl @Inject constructor() : MovieRepository {
                 1,
                 "Big Buck Bunny",
                 "https://upload.wikimedia.org/wikipedia/commons/thumb/c/c5/Big_buck_bunny_poster_big.jpg/1280px-Big_buck_bunny_poster_big.jpg",
-                "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4"
+                "https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4",
             ),
             MovieItem(
                 2,

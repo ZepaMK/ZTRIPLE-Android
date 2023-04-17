@@ -1,6 +1,7 @@
 package com.sb.android_streaming_app.ui.screens.stream
 
 import android.annotation.SuppressLint
+import android.os.SystemClock
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -22,6 +23,8 @@ import androidx.compose.material.icons.filled.FastRewind
 import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -42,6 +45,9 @@ import com.sb.android_streaming_app.ui.components.ProgressBar
 import com.sb.android_streaming_app.ui.screens.detail.DetailViewModel
 import com.sb.android_streaming_app.ui.utils.SocketHandler
 import io.socket.client.Ack
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.isActive
+
 /**
  * Created by Zep S. on 14/04/2023.
  */
@@ -62,6 +68,7 @@ fun StreamScreen(
                         detail = detail,
                         viewModel = detailViewModel,
                         device = device,
+                        duration = detail.duration().toFloat()
                     )
                 },
                 id = id
@@ -85,7 +92,7 @@ fun Detail(
 }
 
 @Composable
-fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String) {
+fun DetailContent(detail: MovieItem, duration: Float, viewModel: DetailViewModel, device: String) {
     var pause by remember { mutableStateOf(false) }
     var seekPosition by remember { mutableStateOf(0f) }
 
@@ -97,8 +104,17 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String)
         verticalArrangement = Arrangement.SpaceEvenly
     ) {
         Column() {
-            Text(text = detail.title, textAlign = TextAlign.Center, fontSize = 30.sp, modifier = Modifier.fillMaxWidth())
-            Text(text = device, textAlign = TextAlign.Center, fontSize = 14.sp, modifier = Modifier.fillMaxWidth().padding(top = 4.dp))
+            Text(
+                text = detail.title,
+                textAlign = TextAlign.Center,
+                fontSize = 30.sp,
+                modifier = Modifier.fillMaxWidth()
+            )
+            Text(
+                text = device, textAlign = TextAlign.Center, fontSize = 14.sp, modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 4.dp)
+            )
         }
 
         AsyncImage(
@@ -111,13 +127,19 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String)
                 .background(MaterialTheme.colors.primary)
                 .size(400.dp)
         )
-        Row(modifier = Modifier.fillMaxWidth()) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             Slider(
+                modifier = Modifier
+                    .padding(start = 8.dp, end = 8.dp)
+                    .weight(1f),
                 value = seekPosition,
                 onValueChange = { seekPosition = it },
-                valueRange = 0f..100f,
+                valueRange = 0f..duration,
                 onValueChangeFinished = {
-                    //TODO
+                    SocketHandler.mSocket?.emit("seek", seekPosition.toInt())
                 },
                 steps = 0,
                 colors = SliderDefaults.colors(
@@ -126,6 +148,7 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String)
                     inactiveTickColor = Color.DarkGray
                 )
             )
+            Text("09:56")
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             IconButton(onClick = {
@@ -138,6 +161,8 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String)
                     tint = Color.White,
                 )
             }
+            SocketHandler.mSocket?.on("play") { pause = false }
+            SocketHandler.mSocket?.on("pause") { pause = true }
             IconButton(onClick = {
                 if (pause) {
                     SocketHandler.mSocket?.emit("play", object : Ack {
@@ -174,3 +199,5 @@ fun DetailContent(detail: MovieItem, viewModel: DetailViewModel, device: String)
         }
     }
 }
+
+
