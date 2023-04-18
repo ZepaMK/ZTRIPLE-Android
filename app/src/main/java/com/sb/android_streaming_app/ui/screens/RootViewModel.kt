@@ -90,8 +90,9 @@ class RootViewModel @Inject constructor(
 //            }
 //        }
 
-        SocketHandler.setSocket("10.52.1.87")
+        SocketHandler.setSocket("192.168.178.120")
         SocketHandler.establishConnection()
+        SocketHandler.mSocket?.emit("join-room", "userId")
         lauched.value = 2
 
 //        service.launchApp("Netflix", object : AppLaunchListener {

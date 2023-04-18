@@ -32,7 +32,7 @@ fun RootNavGraph(navController: NavHostController, device: String) {
             HomeScreen(onClick = {
                 navController.navigate("${NavConstants.Movie.route}/${it}")
                 if (mSocket != null) {
-                    mSocket?.emit("play-vod", 1)
+                    mSocket?.emit("play-vod", 1, "userId")
                 }
             })
         }

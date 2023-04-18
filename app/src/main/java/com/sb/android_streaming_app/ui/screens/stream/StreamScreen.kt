@@ -139,7 +139,7 @@ fun DetailContent(detail: MovieItem, duration: Float, viewModel: DetailViewModel
                 onValueChange = { seekPosition = it },
                 valueRange = 0f..duration,
                 onValueChangeFinished = {
-                    SocketHandler.mSocket?.emit("seek", seekPosition.toInt())
+                    SocketHandler.mSocket?.emit("seek", seekPosition.toInt(), "userId")
                 },
                 steps = 0,
                 colors = SliderDefaults.colors(
@@ -152,7 +152,7 @@ fun DetailContent(detail: MovieItem, duration: Float, viewModel: DetailViewModel
         }
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
             IconButton(onClick = {
-                SocketHandler.mSocket?.emit("rewind")
+                SocketHandler.mSocket?.emit("rewind", "userId")
             }) {
                 Icon(
                     modifier = Modifier.size(60.dp),
@@ -165,13 +165,13 @@ fun DetailContent(detail: MovieItem, duration: Float, viewModel: DetailViewModel
             SocketHandler.mSocket?.on("pause") { pause = true }
             IconButton(onClick = {
                 if (pause) {
-                    SocketHandler.mSocket?.emit("play", object : Ack {
+                    SocketHandler.mSocket?.emit("play","userId", object : Ack {
                         override fun call(vararg args: Any?) {
                             pause = false
                         }
                     })
                 } else {
-                    SocketHandler.mSocket?.emit("pause", object : Ack {
+                    SocketHandler.mSocket?.emit("pause", "userId", object : Ack {
                         override fun call(vararg args: Any?) {
                             pause = true
                         }
@@ -187,7 +187,7 @@ fun DetailContent(detail: MovieItem, duration: Float, viewModel: DetailViewModel
             }
 
             IconButton(onClick = {
-                SocketHandler.mSocket?.emit("fast-forward")
+                SocketHandler.mSocket?.emit("fast-forward","userId")
             }) {
                 Icon(
                     modifier = Modifier.size(60.dp),

@@ -35,10 +35,13 @@ object SocketHandler {
     @Synchronized
     fun establishConnection() {
         mSocket?.connect()
+        // This makes sure the user is in the room with the right client
+
     }
 
     @Synchronized
     fun closeConnection() {
+        mSocket?.emit("disconnect_2", "userId")
         mSocket?.disconnect()
     }
 
