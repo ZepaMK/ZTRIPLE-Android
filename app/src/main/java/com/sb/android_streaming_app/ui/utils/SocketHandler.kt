@@ -36,15 +36,13 @@ object SocketHandler {
     fun establishConnection() {
         mSocket?.connect()
         // This makes sure the user is in the room with the right client
-
+        SocketHandler.mSocket?.emit("join-room", "userId", "Connected to ${android.os.Build.MODEL}")
     }
 
     @Synchronized
     fun closeConnection() {
-        mSocket?.emit("disconnect_2", "userId")
+        mSocket?.emit("disconnect_alert", "userId", "Disconnected from ${android.os.Build.MODEL}")
         mSocket?.disconnect()
     }
-
-
 }
 
