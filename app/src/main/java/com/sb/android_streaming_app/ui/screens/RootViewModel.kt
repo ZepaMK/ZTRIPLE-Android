@@ -90,7 +90,7 @@ class RootViewModel @Inject constructor(
 //            }
 //        }
 
-        SocketHandler.setSocket("10.52.1.83")
+        SocketHandler.setSocket("http://ztriple.martijnvb.nl/")
         SocketHandler.establishConnection()
 
         lauched.value = 2
