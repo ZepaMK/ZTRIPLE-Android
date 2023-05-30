@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import com.connectsdk.device.ConnectableDevice
 import com.connectsdk.service.DIALService
 import com.sb.android_streaming_app.ui.utils.DeviceListener
+import com.sb.android_streaming_app.ui.utils.LauncherHelper
 import com.sb.android_streaming_app.ui.utils.SocketHandler
 import dagger.hilt.android.lifecycle.HiltViewModel
 import javax.inject.Inject
@@ -18,6 +19,7 @@ class RootViewModel @Inject constructor(
     lateinit var device: ConnectableDevice
     lateinit var deviceListener: DeviceListener
     lateinit var dialog: AlertDialog
+    val launcherHelper = LauncherHelper(this)
 
     // Mutable state variables to observe changes in view
     var connected = mutableStateOf(false)
@@ -54,12 +56,11 @@ class RootViewModel @Inject constructor(
 
     // Function to launch application using DIALService
     fun launchApplication(service: DIALService) {
-//        val launcherSmartApp = LauncherHelper(this)
-//        launcherSmartApp.launchSmartTvApplication(service)
+        launcherHelper.launchSmartTvApplication(service)
 
         // Can be removed when not testing mode
-        SocketHandler.setSocket("http://ztriple.martijnvb.nl/")
-        SocketHandler.establishConnection()
-        lauched.value = 2
+//        SocketHandler.setSocket("http://ztriple.martijnvb.nl/")
+//        SocketHandler.establishConnection()
+//        lauched.value = 2
     }
 }

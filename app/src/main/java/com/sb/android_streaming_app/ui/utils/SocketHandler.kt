@@ -7,7 +7,11 @@ import java.net.URISyntaxException
 import kotlin.reflect.KProperty0
 
 /**
- * Created by Zep S. on 11/04/2023.
+ *    Title: Socket.io Connection on Android Kotlin to Node.js Server
+ *    Author: Thushen Mohanarajah
+ *    Date: 11/08/2021
+ *    Code version: 1.0
+ *    Availability: https://medium.com/@thushenarriyam/socket-io-connection-on-android-kotlin-to-node-js-server-71b218c160c9
  */
 object SocketHandler {
 
@@ -16,15 +20,9 @@ object SocketHandler {
     @Synchronized
     fun setSocket(domain: String) {
         try {
-            // "http://10.0.2.2:3000" is the network your Android emulator must use to join the localhost network on your computer
-            // "http://localhost:3000/" will not work
-            // If you want to use your physical phone you could use your ip address plus :3000
-            // This will allow your Android Emulator and physical device at your home to connect to the server
-            Log.d("2ndScreenAPP", domain)
+            // initialize Socket
             mSocket = IO.socket(domain)
-        } catch (e: URISyntaxException) {
-
-        }
+        } catch (e: URISyntaxException) { }
     }
 
     @Synchronized
@@ -36,13 +34,13 @@ object SocketHandler {
     fun establishConnection() {
         mSocket?.connect()
         // This makes sure the user is in the room with the right client
-        SocketHandler.mSocket?.emit("join-room", "userId", "Connected to ${android.os.Build.MODEL}")
+        mSocket?.emit("join-room", "userId", "Connected to ${android.os.Build.MODEL}")
     }
 
     @Synchronized
     fun closeConnection() {
+        // This makes sure a disconnection alert is shown on the smart TV application
         mSocket?.emit("disconnect_alert", "userId", "Disconnected from ${android.os.Build.MODEL}")
         mSocket?.disconnect()
     }
 }
-

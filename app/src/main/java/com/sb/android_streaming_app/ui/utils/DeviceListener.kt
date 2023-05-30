@@ -65,7 +65,6 @@ class DeviceListener(
             dialService = nonNullDevice.getCapability(DIALService::class.java)
             viewModel.deviceConnected()
             viewModel.lauched.value = 1
-
             Log.d("2ndScreenAPP", dialService.serviceDescription.applicationURL)
             viewModel.launchApplication(dialService)
         }

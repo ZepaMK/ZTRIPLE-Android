@@ -22,18 +22,16 @@ class LauncherHelper(private val viewModel: RootViewModel) {
         when (service.serviceDescription.manufacturer) {
             LG -> {
                 // Using DIAL via the Connect SDK library
-                service.launchApp("Netflix", object : Launcher.AppLaunchListener {
+                service.launchApp(APP_ID, object : Launcher.AppLaunchListener {
                     override fun onError(error: ServiceCommandError?) {
                         Log.d("2ndScreenAPP", "App launch unsuccessful: ${error?.message}")
-                        viewModel.deviceDisconnected(true)
+                        SocketHandler.setSocket("http://ztriple.martijnvb.nl")
+                        SocketHandler.establishConnection()
+                        viewModel.lauched.value = 2
                     }
 
                     override fun onSuccess(`object`: LaunchSession?) {
                         Log.d("2ndScreenAPP", "App launch successful")
-                        SocketHandler.setSocket("http://ztriple.martijnvb.nl")
-                        SocketHandler.establishConnection()
-                        viewModel.lauched.value = 2
-
                     }
                 })
             }

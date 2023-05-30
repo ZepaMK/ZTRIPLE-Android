@@ -69,30 +69,7 @@ fun ConnectedDialog(
             title = {
                 Text(text = device.friendlyName, fontSize = 18.sp)
             },
-            text = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.MusicNote,
-                        contentDescription = "VolumeDown",
-                        modifier = Modifier.padding(end = 8.dp)
-                    )
-                    Slider(
-                        value = sliderPosition,
-                        onValueChange = { sliderPosition = it },
-                        valueRange = 0f..100f,
-                        enabled = device.hasCapabilities(VolumeControl.Volume_Set),
-                        onValueChangeFinished = {
-                            //TODO
-                        },
-                        steps = 0,
-                        colors = SliderDefaults.colors(
-                            thumbColor = Color.White,
-                            activeTrackColor = Color.White,
-                            inactiveTickColor = Color.DarkGray
-                        )
-                    )
-                }
-            },
+            text = {},
             properties = DialogProperties(
                 usePlatformDefaultWidth = false
             ),
