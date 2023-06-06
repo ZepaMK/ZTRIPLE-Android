@@ -8,7 +8,7 @@ The primary function of this Android app is granting users the ability to contro
 <br>
 <br>
 **NOTE:** This app serves as a proof of concept and is designed to work specifically with the ZTRIPLE smart TV app, which is not installed on smart TVs by default. 
-However, you can still experience the functionality by modifying the app name within the *LauncherHelper* class. By changing it from "ztriple" to "YouTube," the app will attempt to launch the YouTube app instead. 
+However, you can still experience the functionality by modifying the **appId** within the *LauncherHelper* class. By changing it from "ztriple" to "YouTube," the app will attempt to launch the YouTube app instead. 
 Since YouTube is typically installed on Samsung and LG smart TVs, it should open successfully when the app establishes a connection with the smart TV.
 
 ## Mobile client repository
